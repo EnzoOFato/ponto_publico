@@ -30,11 +30,11 @@ public class Lesson {
     @Column(name="lesson_id")
     private Long id;
 
-    @Column(name="lesson_title")
+    @Column(name="lesson_title", unique=true, nullable=false)
     private String title;
 
     @Lob
-    @Column(name="lesson_text")
+    @Column(name="lesson_text", nullable=false)
     private String text;
 
     @ManyToMany (mappedBy="lessons")
