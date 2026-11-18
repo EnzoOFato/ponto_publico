@@ -2,10 +2,9 @@ package com.fiap.ponto.controller;
 
 import java.util.Set;
 
-import javax.sound.midi.VoiceStatus;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,5 +38,10 @@ public class LessonController {
     @PutMapping("/{lessonId}/quizzes")
     public ResponseEntity<String> addQuiz(@PathVariable Long lessonId, @RequestBody QuizinDto quizinDto) {
         return lessonService.addQuizToLesson(lessonId, quizinDto);
+    }
+
+    @DeleteMapping("delete/{lessonId}")
+    public ResponseEntity<String> deleteLesson(@PathVariable Long lessonId) {
+        return lessonService.deleteLesson(lessonId);
     }
 }

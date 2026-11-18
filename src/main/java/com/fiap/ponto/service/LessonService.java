@@ -82,4 +82,17 @@ public class LessonService {
             return ResponseEntity.badRequest().body(p.getMessage());
         }
     }
+
+    @Transactional
+    public ResponseEntity<String> deleteLesson(Long lessonId) {
+        try {
+            lessonRepository.findById(lessonId).orElseThrow(() -> new PontoException("Lesson not found"));
+
+            lessonRepository.deleteById(lessonId);
+            return ResponseEntity.ok("Deleted lesson with id " + lessonId);
+        }
+        catch (PontoException p) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(p.getMessage());
+        }
+    }
 }

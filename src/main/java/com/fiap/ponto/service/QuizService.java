@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -45,8 +46,9 @@ public class QuizService {
 
         Quiz quiz = new Quiz();
         quiz.setDoubt(quizinDto.doubt());
-        quiz.setQuestions(questionService.questionsForQuiz(quiz, quizinDto.questions()));
         quiz.setLesson(lesson);
+
+        quiz.setQuestions(questionService.questionsForQuiz(quiz, quizinDto.questions()));
 
         return quiz;
     }
@@ -59,5 +61,17 @@ public class QuizService {
 
     public Set<QuizOutDto> getAll() {
         return quizRepository.findAll().stream().map(q -> quizToDto(q)).collect(Collectors.toSet());
+    }
+
+    public ResponseEntity<String> deleteQuiz(Long quizId) {
+        try {
+            quizRepository.findById(quizId).orElseThrow(() -> new PontoException("Quiz not found"));
+
+            quizRepository.deleteById(quizId);
+            return ResponseEntity.ok("Quiz (%d) deleted".formatted(quizId));
+        }
+        catch (PontoException p) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(p.getMessage());
+        }
     }
 }

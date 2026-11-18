@@ -1,7 +1,6 @@
 package com.fiap.ponto.service;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,7 +20,7 @@ public class QuestionService {
     private QuestionRepository questionRepository;
 
     public Set<Question> questionsForQuiz(Quiz quiz, Set<QuestionInDto> questionInDtos) {
-        return questionInDtos.stream()
+        Set<Question> questions = questionInDtos.stream()
         .map(q -> {
             verifyNull(q);
             Question question = new Question();
@@ -32,6 +31,8 @@ public class QuestionService {
         }
         )
         .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        return questions;
     }
 
     private void verifyNull(QuestionInDto questionInDto) {
