@@ -26,6 +26,9 @@ public class Question {
     @Column (name="question_correct")
     private Boolean isCorrect;
 
+    @Column (name = "question_text")
+    private String text;
+
     @ManyToOne (optional=false, fetch=FetchType.LAZY)
     private Quiz quiz;
 }

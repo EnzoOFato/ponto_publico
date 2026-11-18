@@ -1,21 +1,23 @@
 package com.fiap.ponto.service;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fiap.ponto.dto.input.LessonInDto;
+import com.fiap.ponto.dto.input.QuizinDto;
 import com.fiap.ponto.dto.output.LessonOutDto;
+import com.fiap.ponto.dto.output.QuizOutDto;
+import com.fiap.ponto.dto.output.TagOutDto;
 import com.fiap.ponto.exception.PontoException;
 import com.fiap.ponto.model.Lesson;
-import com.fiap.ponto.model.Tag;
 import com.fiap.ponto.repository.LessonRepository;
-import com.fiap.ponto.repository.TagRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service 
 public class LessonService {
@@ -23,8 +25,12 @@ public class LessonService {
     private LessonRepository lessonRepository;
 
     @Autowired
-    private TagRepository tagRepository;
+    private TagService tagService;
 
+    @Autowired
+    private QuizService quizService;
+
+    @Transactional
     public ResponseEntity<String> createLesson(LessonInDto lessonIn) {
         try {
             lessonRepository.save(inToLesson(lessonIn));
@@ -46,32 +52,34 @@ public class LessonService {
         Lesson lesson = new Lesson();
         lesson.setTitle(lessonIn.title());
         lesson.setText(lessonIn.text());
-        lesson.setTags(resolveTags(lessonIn.tagIds()));
+        lesson.setTags(tagService.resolveTags(lessonIn.tagIds()));
 
         return lesson;
     }
 
     private LessonOutDto lessonToOut(Lesson lesson) {
-        LessonOutDto lessonOutDto = new LessonOutDto(lesson.getId(), lesson.getTitle(), lesson.getText(), lesson.getTags());
+        Set<TagOutDto> tagsOut = lesson.getTags().stream().map(t -> tagService.tagToDto(t)).collect(Collectors.toSet());
+        Set<QuizOutDto> quizesOut = lesson.getQuizs().stream().map(q -> quizService.quizToDto(q)).collect(Collectors.toSet());
+        LessonOutDto lessonOutDto = new LessonOutDto(lesson.getId(), lesson.getTitle(), lesson.getText(), tagsOut, quizesOut);
         return lessonOutDto;
     }
 
     private boolean verifyNull (LessonInDto lessonIn) {
-        return lessonIn.title() == null || lessonIn.text() == null;
+        return lessonIn.title() == null || lessonIn.text() == null || lessonIn.title().isEmpty() || lessonIn.text().isEmpty();
     }
 
-    private Set<Tag> resolveTags(Set<Long> tagIds) {
-        if (tagIds == null || tagIds.isEmpty()) return new HashSet<>();
+    @Transactional
+    public ResponseEntity<String> addQuizToLesson(Long lessonId, QuizinDto quizinDto) {
+        try {
+            if (lessonRepository.findById(lessonId).isEmpty()){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Lesson found with %d id".formatted(lessonId));
+            }
+            Lesson lesson = lessonRepository.findById(lessonId).get();
 
-        List<Tag> found = tagRepository.findAllById(tagIds);
-
-        if (found.size() != tagIds.size()) {
-            Set<Long> foundIds = found.stream().map(Tag::getId).collect(Collectors.toSet());
-            Set<Long> missing = new HashSet<>(tagIds);
-            missing.removeAll(foundIds);
-            throw new PontoException("Tags não encontradas: " + missing);
+            return quizService.addQuiz(lesson, quizinDto);
         }
-
-        return new HashSet<>(found);
+        catch (PontoException p) {
+            return ResponseEntity.badRequest().body(p.getMessage());
+        }
     }
 }
