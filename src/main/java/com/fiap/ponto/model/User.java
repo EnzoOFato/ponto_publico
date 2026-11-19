@@ -44,4 +44,8 @@ public class User {
         inverseJoinColumns= @JoinColumn (name="lesson_id")
     )
     private Set<Lesson> lessons = new HashSet<>();
+
+    public void addLesson(Lesson lesson) {
+        this.lessons.add(lesson);
+    }
 }

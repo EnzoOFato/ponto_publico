@@ -1,9 +1,7 @@
 package com.fiap.ponto.service;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +42,7 @@ public class LessonService {
         }
     }
 
+    @Transactional
     public Set<LessonOutDto> getAll() {
         return lessonRepository.findAll().stream().map(l -> lessonToOut(l)).collect(Collectors.toSet());
     }
@@ -135,5 +134,9 @@ public class LessonService {
         return lessons.stream()
         .map(l -> l.getId())
         .collect(Collectors.toSet());
+    }
+
+    protected Lesson getById(Long lessonId) {
+        return lessonRepository.findById(lessonId).orElseThrow(() -> new PontoException("Lesson could not be found"));
     }
 }

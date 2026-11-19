@@ -1,7 +1,5 @@
 package com.fiap.ponto.service;
 
-import java.lang.classfile.Attribute;
-import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fiap.ponto.dto.input.UserInDto;
 import com.fiap.ponto.dto.output.UserOutDto;
 import com.fiap.ponto.exception.PontoException;
+import com.fiap.ponto.model.Lesson;
 import com.fiap.ponto.model.User;
 import com.fiap.ponto.repository.UserRepository;
 
@@ -25,6 +24,7 @@ public class UserService {
     @Autowired
     private LessonService lessonService;
 
+    @Transactional
     public List<UserOutDto> getAll() {
         return userRepository.findAll().stream()
         .map(u -> userToDto(u))
@@ -55,10 +55,10 @@ public class UserService {
             String name = userIn.name();
             String password = userIn.password();
 
-            if (password.length() <= 5 ) throw new PontoException("User Password must have at least 6 characters");
 
             if (Boolean.TRUE.equals(userIn.changePassword())) {
                 stringValidation(password, "Password can't be null");
+                if (password.length() <= 5 ) throw new PontoException("User Password must have at least 6 characters");
                 user.setPassword(password);
                 return ResponseEntity.ok("User password changed");
             }
@@ -76,15 +76,37 @@ public class UserService {
     @Transactional
     public ResponseEntity<String> delete(Long userId) {
         try {
-            getUserById(userId);
+            User user = getUserById(userId);
 
-            userRepository.deleteById(userId);
+            userRepository.delete(user);
 
             return ResponseEntity.ok("User deleted!");
         }
         catch (PontoException p) {
             return ResponseEntity.badRequest().body(p.getMessage());
         }
+    }
+
+    @Transactional
+    public ResponseEntity<String> inscribeInLesson(Long userId, Long lessonId) {
+        try{
+            Lesson lesson = lessonService.getById(lessonId);
+            User user = getUserById(userId);
+
+            if (user.getLessons().contains(lesson)) throw new PontoException("User alredy is registred to this lessos");
+
+            user.addLesson(lesson);
+
+            return ResponseEntity.ok("%s was inscribed into %s".formatted(user.getNickName(), lesson.getTitle()));
+        }
+        catch (PontoException p) {
+            return ResponseEntity.badRequest().body(p.getMessage());
+        }
+    }
+
+    @Transactional
+    public UserOutDto getById(Long userId) {
+        return userToDto(getUserById(userId));
     }
 
     private User getUserById(Long id) {

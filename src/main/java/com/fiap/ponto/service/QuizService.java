@@ -29,7 +29,7 @@ public class QuizService {
     private QuestionService questionService;
 
     @Transactional
-    protected ResponseEntity<String> addQuiz(Lesson lesson, QuizinDto quizinDto) {
+    public ResponseEntity<String> addQuiz(Lesson lesson, QuizinDto quizinDto) {
         try {
             quizRepository.save(dtoToQuiz(quizinDto, lesson));
             return ResponseEntity.ok("Quiz added with succes to lesson: %s".formatted(lesson.getTitle()));
@@ -41,6 +41,8 @@ public class QuizService {
 
     private Quiz dtoToQuiz(QuizinDto quizinDto, Lesson lesson) {
         if (quizinDto.doubt() == null || quizinDto.doubt().isEmpty()) throw new PontoException("Doubt from the quiz is empty");
+
+        if (quizinDto.questions() == null) throw new PontoException("Quiz must have questions");
 
         if (quizinDto.questions().size() < 3 || quizinDto.questions().size() > 5) {
             throw new PontoException("Quiz must have at least 4 questions and no more than 5");
@@ -67,10 +69,12 @@ public class QuizService {
         return quizOutDto;
     }
 
+    @Transactional
     public Set<QuizOutDto> getAll() {
         return quizRepository.findAll().stream().map(q -> quizToDto(q)).collect(Collectors.toSet());
     }
 
+    @Transactional
     public ResponseEntity<String> deleteQuiz(Long quizId) {
         try {
             quizRepository.findById(quizId).orElseThrow(() -> new PontoException("Quiz not found"));
@@ -86,7 +90,7 @@ public class QuizService {
     private void verifyQuestions(Set<QuestionInDto> questions) {
         int counterTrue = 0;
         for (QuestionInDto q : questions) {
-            if (q.isCorrect()) counterTrue++;
+            if (Boolean.TRUE.equals(q.isCorrect())) counterTrue++;
         }
 
         if (counterTrue == 0) throw new PontoException("Quiz must have at least one correct question");

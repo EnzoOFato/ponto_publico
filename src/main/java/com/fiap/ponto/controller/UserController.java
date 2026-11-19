@@ -28,6 +28,11 @@ public class UserController {
         return userService.getAll();
     }
 
+    @GetMapping("/get/{userId)")
+    public UserOutDto getById(@PathVariable Long userId) {
+        return userService.getById(userId);
+    }
+
     @PostMapping ("/create")
     public ResponseEntity<String> createUser(@RequestBody UserInDto userIn) {
         return userService.create(userIn);
@@ -36,6 +41,11 @@ public class UserController {
     @PutMapping("/update/{userId}")
     public ResponseEntity<String> updateuser(@RequestBody UserInDto userIn, @PathVariable Long userId) {
         return userService.update(userId, userIn);
+    }
+
+    @PutMapping("/update/{userId}/lesson/{lessonId}")
+    public ResponseEntity<String> inscribeInLesson(@PathVariable Long userId, @PathVariable Long lessonId) {
+        return userService.inscribeInLesson(userId, lessonId);
     }
 
     @DeleteMapping("/delete/{userId}")
