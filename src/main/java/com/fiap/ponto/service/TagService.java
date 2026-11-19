@@ -79,6 +79,6 @@ public class TagService {
     }
 
     public Tag getByTag(String tag) {
-        return tagRepository.findByTag(tag).orElse(null);
+        return tagRepository.findByTagIgnoreCase(tag).orElse(null);
     }
 }
