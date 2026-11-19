@@ -1,12 +1,15 @@
 package com.fiap.ponto.service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fiap.ponto.dto.input.LessonInDto;
 import com.fiap.ponto.dto.input.QuizinDto;
@@ -15,9 +18,8 @@ import com.fiap.ponto.dto.output.QuizOutDto;
 import com.fiap.ponto.dto.output.TagOutDto;
 import com.fiap.ponto.exception.PontoException;
 import com.fiap.ponto.model.Lesson;
+import com.fiap.ponto.model.Tag;
 import com.fiap.ponto.repository.LessonRepository;
-
-import jakarta.transaction.Transactional;
 
 @Service 
 public class LessonService {
@@ -90,6 +92,23 @@ public class LessonService {
 
             lessonRepository.deleteById(lessonId);
             return ResponseEntity.ok("Deleted lesson with id " + lessonId);
+        }
+        catch (PontoException p) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(p.getMessage());
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<String> updateLessonTag(Set<Long> tagids, Long lessonid) {
+        try {
+            Lesson lesson = lessonRepository.findById(lessonid)
+            .orElseThrow(() -> new PontoException("ERRO, Lesson could not be found"));
+            Set<Tag> tagsForLesson = tagService.getAllByIds(tagids);
+
+            lesson.getTags().clear();
+            lesson.setTags(tagsForLesson);
+
+            return ResponseEntity.ok("Tags Added to lesson: %s".formatted(lesson.getTitle()));
         }
         catch (PontoException p) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(p.getMessage());

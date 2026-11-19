@@ -1,5 +1,6 @@
 package com.fiap.ponto.controller;
 
+import java.net.http.HttpClient;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +41,13 @@ public class LessonController {
         return lessonService.addQuizToLesson(lessonId, quizinDto);
     }
 
-    @DeleteMapping("delete/{lessonId}")
+    @DeleteMapping("/delete/{lessonId}")
     public ResponseEntity<String> deleteLesson(@PathVariable Long lessonId) {
         return lessonService.deleteLesson(lessonId);
+    }
+
+    @PutMapping("/put_tag/lessonId={lessonid}")
+    public ResponseEntity<String> putTagLesson(@RequestBody Set<Long> tagIds, @PathVariable Long lessonid) {
+        return lessonService.updateLessonTag(tagIds, lessonid);
     }
 }
