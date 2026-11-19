@@ -1,7 +1,9 @@
 package com.fiap.ponto.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,5 +129,11 @@ public class LessonService {
         catch (PontoException p) {
             return new HashSet<>();
         }
+    }
+
+    protected Set<Long> getIds(Set<Lesson> lessons){
+        return lessons.stream()
+        .map(l -> l.getId())
+        .collect(Collectors.toSet());
     }
 }

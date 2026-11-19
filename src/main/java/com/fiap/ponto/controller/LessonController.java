@@ -1,6 +1,5 @@
 package com.fiap.ponto.controller;
 
-import java.net.http.HttpClient;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
