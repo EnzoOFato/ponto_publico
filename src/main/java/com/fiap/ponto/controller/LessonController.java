@@ -26,14 +26,19 @@ public class LessonController {
     @Autowired
     private LessonService lessonService;
 
-    @PostMapping ("/create")
-    public ResponseEntity<String> createLesson(@RequestBody LessonInDto lessonInDto) {
-        return lessonService.createLesson(lessonInDto);
-    }
-
     @GetMapping("/getall")
     public Set<LessonOutDto> getAllLessons(){
         return lessonService.getAll();
+    }
+
+    @GetMapping("/getbytagsnames")
+    public Set<LessonOutDto> geyByTagsNamesSet(@RequestBody Set<String> tagNames){
+        return lessonService.getByTagsNames(tagNames);
+    }
+
+    @PostMapping ("/create")
+    public ResponseEntity<String> createLesson(@RequestBody LessonInDto lessonInDto) {
+        return lessonService.createLesson(lessonInDto);
     }
 
     @PutMapping("/{lessonId}/quizzes")

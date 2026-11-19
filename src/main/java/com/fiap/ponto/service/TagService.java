@@ -77,4 +77,8 @@ public class TagService {
     public Set<TagOutDto> getAll() {
         return tagRepository.findAll().stream().map(t -> tagToDto(t)).collect(Collectors.toSet());
     }
+
+    public Tag getByTag(String tag) {
+        return tagRepository.findByTag(tag).orElse(null);
+    }
 }

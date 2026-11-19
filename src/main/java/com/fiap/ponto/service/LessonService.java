@@ -1,12 +1,11 @@
 package com.fiap.ponto.service;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -112,6 +111,21 @@ public class LessonService {
         }
         catch (PontoException p) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(p.getMessage());
+        }
+    }
+
+    public Set<LessonOutDto> getByTagsNames(Set<String> tagNames) {
+        try {
+            Set<LessonOutDto> lessons = getAll();
+
+            return lessons.stream()
+                .filter(l -> l.tags().stream()
+                    .anyMatch(t -> tagNames.contains(t.tag())))
+                .collect(Collectors.toSet());
+
+        } 
+        catch (PontoException p) {
+            return new HashSet<>();
         }
     }
 }
